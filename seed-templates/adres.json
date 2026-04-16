@@ -1,0 +1,48 @@
+{
+  "title": "Adreslabel",
+  "label": {
+    "width_mm": 62,
+    "height_mm": 40,
+    "border": false
+  },
+  "elements": [
+    {
+      "type": "text",
+      "x_mm": 3,
+      "y_mm": 4,
+      "w_mm": 56,
+      "h_mm": 6,
+      "text": "{{naam}}",
+      "size_pt": 13,
+      "bold": true
+    },
+    {
+      "type": "text",
+      "x_mm": 3,
+      "y_mm": 14,
+      "w_mm": 56,
+      "h_mm": 6,
+      "text": "{{straat}}",
+      "size_pt": 11
+    },
+    {
+      "type": "text",
+      "x_mm": 3,
+      "y_mm": 22,
+      "w_mm": 56,
+      "h_mm": 6,
+      "text": "{{postcode}}  {{plaats}}",
+      "size_pt": 11
+    },
+    {
+      "type": "text",
+      "x_mm": 3,
+      "y_mm": 31,
+      "w_mm": 56,
+      "h_mm": 5,
+      "text": "{{land}}",
+      "size_pt": 10,
+      "italic": true
+    }
+  ]
+}

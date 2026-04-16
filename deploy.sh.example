@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Copy to deploy.sh, edit for your setup (deploy.sh is gitignored).
+set -euo pipefail
+SRC="$(dirname "$(readlink -f "$0")")/app"
+rsync -az --delete -e "ssh -J root@YOUR-PROXMOX-HOST" \
+  "$SRC/" "root@YOUR-CONTAINER-IP:/opt/labelprinter/app/"
+echo "Deployed $(date)"

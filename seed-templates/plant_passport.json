@@ -1,0 +1,58 @@
+{
+  "title": "Plant passport",
+  "label": {
+    "width_mm": 62,
+    "height_mm": 30,
+    "border": true,
+    "border_mm": 0.3
+  },
+  "elements": [
+    {
+      "type": "qr",
+      "x_mm": 3,
+      "y_mm": 3,
+      "w_mm": 22,
+      "h_mm": 22,
+      "data": "{{url}}"
+    },
+    {
+      "type": "text",
+      "x_mm": 27,
+      "y_mm": 3,
+      "w_mm": 34,
+      "h_mm": 5,
+      "text": "{{latin}}",
+      "size_pt": 9,
+      "bold": true,
+      "italic": true
+    },
+    {
+      "type": "text",
+      "x_mm": 27,
+      "y_mm": 10,
+      "w_mm": 34,
+      "h_mm": 4,
+      "text": "{{nl_name}}",
+      "size_pt": 9
+    },
+    {
+      "type": "text",
+      "x_mm": 27,
+      "y_mm": 16,
+      "w_mm": 34,
+      "h_mm": 6,
+      "text": "{{other}}",
+      "size_pt": 7
+    },
+    {
+      "type": "text",
+      "x_mm": 27,
+      "y_mm": 23,
+      "w_mm": 34,
+      "h_mm": 4,
+      "text": "{{short_id}}",
+      "size_pt": 7,
+      "mono": true
+    }
+  ]
+}

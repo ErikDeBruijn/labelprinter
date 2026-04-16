@@ -1,0 +1,19 @@
+# Personal / local-only
+deploy.sh
+local-templates/
+*.local.json
+
+# Build artifacts / runtime
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+node_modules/
+.DS_Store
+
+# Preview / test outputs
+sample-label*.pdf
+sample-label*.png
+/tmp/

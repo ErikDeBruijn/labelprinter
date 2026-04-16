@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <title>Labelprinter — Ontwerp</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="mark">🏷️</span>
+        <span class="name">Labelprinter</span>
+      </div>
+      <div class="doc-title" contenteditable="plaintext-only" spellcheck="false">Nieuw label</div>
+      <div class="topbar-actions">
+        <div class="printer-chip" id="printerChip" title="Printerstatus">
+          <span class="dot"></span>
+          <span id="printerText">verbinden…</span>
+        </div>
+        <div class="menu-wrap">
+          <button class="btn ghost" id="btnTemplates" title="Templates">📋 Template ▾</button>
+          <div class="menu" id="templatesMenu" role="menu"></div>
+        </div>
+        <button class="btn ghost" id="btnPdf" title="PDF uploaden en printen">📄 PDF</button>
+        <button class="btn ghost" id="btnShare" title="Kopieer deelbare link">🔗 Link</button>
+        <div class="menu-wrap">
+          <button class="btn ghost" id="btnMore" title="Meer acties">⋯</button>
+          <div class="menu" id="moreMenu" role="menu">
+            <button role="menuitem" id="btnExport">⬇︎ Download JSON</button>
+            <button role="menuitem" id="btnImport">⬆︎ Upload JSON</button>
+            <button role="menuitem" id="btnSaveTemplate">💾 Opslaan als template…</button>
+          </div>
+        </div>
+        <button class="btn primary" id="btnPrint">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print
+        </button>
+      </div>
+    </header>
+
+    <aside class="toolbar">
+      <button class="tool active" data-tool="select" title="Selecteren (V)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
+      </button>
+      <button class="tool" data-tool="text" title="Tekst (T)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+      </button>
+      <button class="tool" data-tool="qr" title="QR-code (Q)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14h1M14 20h3M20 17v4"/></svg>
+      </button>
+      <button class="tool" data-tool="rect" title="Rechthoek (R)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="1"/></svg>
+      </button>
+      <button class="tool" data-tool="line" title="Lijn (L)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="19" x2="19" y2="5"/></svg>
+      </button>
+      <div class="tool-sep"></div>
+      <button class="tool" data-tool="delete" title="Verwijderen (Del)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      </button>
+    </aside>
+
+    <main class="canvas-area" id="canvasArea">
+      <div class="canvas-wrap" id="canvasWrap">
+        <div class="label-size-indicator" id="sizeIndicator">62 × 30 mm</div>
+        <canvas id="canvas"></canvas>
+        <div class="handles-layer" id="handles"></div>
+      </div>
+      <div class="zoom-controls">
+        <button class="btn icon" id="zoomOut" title="Uitzoomen">−</button>
+        <span id="zoomLabel">100%</span>
+        <button class="btn icon" id="zoomIn" title="Inzoomen">+</button>
+        <button class="btn icon" id="zoomFit" title="Passend">⤢</button>
+      </div>
+    </main>
+
+    <aside class="panel" id="propPanel">
+      <section class="panel-section">
+        <h3>Label</h3>
+        <div class="row">
+          <label>Breedte</label>
+          <select id="widthSel">
+            <option value="62">62 mm (DK-22205)</option>
+            <option value="29">29 mm</option>
+            <option value="38">38 mm</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>Hoogte</label>
+          <div class="input-group">
+            <input type="number" id="heightIn" value="30" min="10" max="200" step="1">
+            <span class="suffix">mm</span>
+          </div>
+        </div>
+        <p class="muted small">Auto-gedetecteerd op basis van sensor. Je kunt overschrijven.</p>
+        <div class="row" style="margin-top: 0.8rem;">
+          <label>Kader</label>
+          <label class="switch">
+            <input type="checkbox" id="borderToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel-section" id="selProps" style="display:none">
+        <h3 id="selTitle">Element</h3>
+        <div id="selEditor"></div>
+      </section>
+
+      <section class="panel-section">
+        <h3>Elementen</h3>
+        <ul class="layer-list" id="layers"></ul>
+      </section>
+    </aside>
+
+    <footer class="statusbar">
+      <div class="status-left">
+        <span class="mono" id="mouseCoord">—</span>
+      </div>
+      <div class="status-right">
+        <span id="statusText">Klaar</span>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="modal" id="pdfModal" hidden>
+      <div class="modal-card">
+        <header class="modal-header">
+          <h2>PDF printen</h2>
+          <button class="btn icon" id="pdfClose" title="Sluiten">×</button>
+        </header>
+        <div class="modal-body">
+          <div class="dropzone" id="pdfDrop">
+            <div class="dz-icon">📄</div>
+            <div class="dz-title">Sleep een PDF hierheen</div>
+            <div class="dz-sub">of <button class="btn ghost" id="pdfPick">kies een bestand…</button></div>
+            <input type="file" id="pdfInput" accept="application/pdf,.pdf" hidden>
+          </div>
+          <div class="pdf-preview" id="pdfPreview" hidden>
+            <img id="pdfImg" alt="PDF preview">
+            <div class="pdf-meta" id="pdfMeta"></div>
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <label class="inline-check"><input type="checkbox" id="pdfCrop" checked> Whitespace wegsnijden</label>
+          <div class="spacer"></div>
+          <button class="btn" id="pdfCancel">Annuleren</button>
+          <button class="btn primary" id="pdfPrint" disabled>Print</button>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/static/app.js"></script>
+</body>
+</html>
