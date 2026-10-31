@@ -313,6 +313,13 @@ The frontend hot-reloads on backend `uvicorn --reload` whenever `app/` changes.
 Static assets are cache-busted via `?v=<mtime>` in the HTML so you don't need
 to hard-reload the browser.
 
+## Roadmap
+
+- **Portable print server on a Raspberry Pi:** a minimal, fast-booting image built
+  with Buildroot or similar, so the printer and its server can go anywhere.
+- **Run from a laptop:** connect the printer directly to a Mac and host the server
+  there. This needs a printer connection that doesn't depend on a Linux device path.
+
 ## License
 
 GNU Affero General Public License v3.0 or later. See [LICENSE](./LICENSE).
