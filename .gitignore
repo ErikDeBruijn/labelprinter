@@ -1,5 +1,7 @@
 # Personal / local-only
 deploy.sh
+data/
+.devdata/
 local-templates/
 *.local.json
 

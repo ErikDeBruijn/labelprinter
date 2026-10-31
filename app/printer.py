@@ -18,7 +18,7 @@ from brother_ql.backends.linux_kernel import BrotherQLBackendLinuxKernel
 from brother_ql.conversion import convert
 from brother_ql.raster import BrotherQLRaster
 
-DEVICE = "/dev/usb/lp2"
+DEVICE = os.environ.get("LABELPRINTER_DEVICE", "/dev/usb/lp2")
 MODEL = "QL-570"
 
 

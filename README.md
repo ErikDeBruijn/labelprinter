@@ -185,6 +185,15 @@ has no auth of its own. If you expose it
 publicly, *always* add IP allowlisting, basic auth, or OAuth in the proxy.
 The printer happily prints whatever anyone sends it.
 
+## Configuration
+
+Set these in the environment, for example with `Environment=` in the systemd unit:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `LABELPRINTER_DATA` | `/opt/labelprinter/data` | Templates, queue and history. Keep this outside the code so a deploy leaves it alone. |
+| `LABELPRINTER_DEVICE` | `/dev/usb/lp2` | Device node of the printer. |
+
 ## Templates
 
 Templates are simple JSON files in `/opt/labelprinter/data/templates/<name>.json`:
