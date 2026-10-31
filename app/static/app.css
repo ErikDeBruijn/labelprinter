@@ -35,9 +35,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .app {
   display: grid;
   grid-template-columns: var(--toolbar-w) 1fr var(--panel-w);
-  grid-template-rows: var(--topbar-h) 1fr var(--statusbar-h);
+  grid-template-rows: var(--topbar-h) auto 1fr var(--statusbar-h);
   grid-template-areas:
     "top top top"
+    "alert alert alert"
     "tools canvas panel"
     "status status status";
   height: 100vh;
@@ -89,6 +90,78 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .printer-chip.ok .dot { background: var(--ok); box-shadow: 0 0 8px rgba(34, 197, 94, 0.5); }
 .printer-chip.err .dot { background: var(--err); }
+.printer-chip.warn .dot { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
+
+/* Queue chip */
+.queue-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.7rem;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: #fbbf24;
+  cursor: pointer;
+  font-family: inherit;
+}
+.queue-chip:hover { background: rgba(245, 158, 11, 0.25); }
+.queue-chip[hidden] { display: none; }
+.queue-icon { font-size: 0.9rem; }
+
+/* Fold toggle (laminate double-side mode) */
+.fold-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.fold-toggle:hover { color: var(--text); border-color: #2e333d; }
+.fold-toggle input { margin: 0; accent-color: var(--primary); cursor: pointer; }
+.fold-toggle.on { color: var(--text); background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.45); }
+.fold-toggle[hidden] { display: none; }
+
+/* Printer offline alert (with photo) */
+.alert {
+  grid-area: alert;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.08));
+  border-bottom: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fde68a;
+}
+.alert[hidden] { display: none; }
+.alert-photo {
+  width: 88px;
+  height: auto;
+  max-height: 130px;
+  border-radius: var(--radius-sm);
+  object-fit: contain;
+  background: rgba(0,0,0,0.25);
+  flex-shrink: 0;
+}
+.alert-text { flex: 1; min-width: 0; line-height: 1.35; }
+.alert-title { font-weight: 600; color: #fde68a; font-size: 0.95rem; }
+.alert-sub { font-size: 0.85rem; color: rgba(253, 230, 138, 0.85); margin-top: 0.15rem; }
+.alert-meta { font-size: 0.8rem; color: rgba(253, 230, 138, 0.95); margin-top: 0.35rem; font-weight: 500; }
+.alert-meta[hidden] { display: none; }
+.alert-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+.btn.small { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+
+/* When in simple/embed mode, hide the alert too (it's distracting in embeds) */
+body.simple-mode .alert,
+body.embed-mode .alert { display: none !important; }
 
 /* Buttons */
 .btn {
@@ -136,6 +209,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .tool:hover { background: rgba(255,255,255,0.04); color: var(--text); }
 .tool.active { background: var(--accent-soft); color: var(--accent); border-color: rgba(247, 129, 102, 0.25); }
+.tool:disabled { opacity: 0.28; cursor: default; }
+.tool:disabled:hover { background: transparent; color: var(--text-dim); }
 .tool-sep { width: 24px; height: 1px; background: var(--border); margin: 0.35rem 0; }
 
 /* Canvas area */
@@ -172,6 +247,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   border: 1.5px solid var(--primary);
   pointer-events: none;
 }
+.handles-layer .rubber-band {
+  position: absolute;
+  border: 1px dashed var(--primary);
+  background: rgba(59, 130, 246, 0.12);
+  pointer-events: none;
+}
 .handles-layer .handle {
   position: absolute;
   width: 9px; height: 9px;
@@ -183,6 +264,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .handles-layer .handle.hover-area {
   pointer-events: auto; cursor: move;
 }
+.handles-layer .handle.handle-rot {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--primary);
+  cursor: grab;
+}
+.handles-layer .handle.handle-rot:active { cursor: grabbing; }
 
 .label-size-indicator {
   position: absolute;
@@ -320,6 +410,28 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .menu button:hover { background: rgba(255,255,255,0.05); }
 .menu .dim { color: var(--text-faint); font-size: 0.78rem; }
 .menu-empty { color: var(--text-faint); padding: 0.6rem 0.7rem; font-style: italic; font-size: 0.85rem; }
+.print-split { display: flex; align-items: stretch; }
+.print-split .menu-wrap { display: flex; }
+.print-split #btnPrint { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+#btnPrintMore {
+  padding: 0 0.55rem;
+  border-top-left-radius: 0; border-bottom-left-radius: 0;
+  border-left: 1px solid rgba(255,255,255,0.3);
+}
+#printMenu { min-width: 150px; }
+#templatesMenu {
+  width: min(340px, calc(100vw - 16px));
+  max-height: calc(100vh - var(--topbar-h) - 16px);
+  overflow-y: auto;
+}
+.menu button.template-item { flex: none; justify-content: flex-start; align-items: center; gap: 0.7rem; }
+.template-thumb {
+  flex: none;
+  width: 72px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+}
+.template-thumb img { max-width: 100%; max-height: 100%; background: #fff; border-radius: 2px; }
+.template-text { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
 
 /* Modal */
 .modal {
@@ -471,6 +583,7 @@ body.simple-mode .panel,
 body.simple-mode .doc-title,
 body.simple-mode #btnTemplates,
 body.simple-mode #btnPdf,
+body.simple-mode #btnImage,
 body.simple-mode #btnShare,
 body.simple-mode #btnMore,
 body.simple-mode .menu-wrap,
@@ -511,6 +624,49 @@ body.simple-mode #btnPrint:hover {
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.55), 0 3px 8px rgba(0,0,0,0.35);
 }
 body.simple-mode #btnPrint svg { width: 18px; height: 18px; }
+
+/* History list */
+.history-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+.history-list li {
+  display: flex; align-items: center; gap: 0.8rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+.history-list li:hover { background: #1d2029; border-color: #3a3f4a; }
+.history-list .h-title { flex: 1; font-weight: 500; color: var(--text); }
+.history-list .h-meta { font-size: 0.78rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.history-list .h-del {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.85rem;
+  opacity: 0.5;
+}
+.history-list .h-del:hover { opacity: 1; color: var(--err); }
+.history-empty { color: var(--text-faint); padding: 2rem 1rem; text-align: center; font-size: 0.88rem; font-style: italic; }
+
+.upgrade-link {
+  position: fixed;
+  top: 1rem;
+  right: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  z-index: 85;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.upgrade-link:hover {
+  color: var(--text);
+  background: rgba(255,255,255,0.08);
+  border-color: #3d424d;
+  text-decoration: none;
+}
 body.simple-mode .topbar { gap: 0.5rem; }
 body.simple-mode .canvas-area { padding: 2rem 1.5rem; }
 

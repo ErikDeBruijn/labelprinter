@@ -20,6 +20,8 @@ shell scripts, …).
 - **Deep-link URLs** — `?template=<name>&var1=...&var2=...` opens a pre-filled design
 - **PDF upload** — drag-and-drop arbitrary PDFs (shipping labels, anything), preview, print
 - **Sensor-based label detection** — the service reads the loaded DK label from the printer and auto-scales
+- **Template thumbnails** — see every template in the picker before you load it
+- **Multiple copies** — print a label up to 99 times from the Print dropdown
 - **REST API** — `/print/template/<name>`, `/print/from-design`, `/print/pdf`, `/print/image`
 
 ## Why not the official software
@@ -59,7 +61,7 @@ and gives a designer that feels like a web app instead of a set of web pages.
 1. **Create an LXC** (Debian 13 template, ~256 MB RAM, 1 core, 2 GB disk):
 
    ```bash
-   pct create 133 local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst \
+   pct create 200 local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst \
      --hostname labelprinter \
      --memory 256 --swap 256 --cores 1 \
      --net0 name=eth0,bridge=vmbr0,ip=dhcp,type=veth \
@@ -82,27 +84,27 @@ and gives a designer that feels like a web app instead of a set of web pages.
    Attach the character device to the LXC (Proxmox 8.1+):
 
    ```bash
-   pct set 133 --dev0 /dev/usb/lp2,gid=7
+   pct set 200 --dev0 /dev/usb/lp2,gid=7
    pct start 133
    ```
 
    Verify inside the container:
 
    ```bash
-   pct exec 133 -- ls /dev/usb/
+   pct exec 200 -- ls /dev/usb/
    # crw-rw---- 1 root lp 180, 2 … lp2
    ```
 
 3. **Install runtime dependencies** inside the container:
 
    ```bash
-   pct exec 133 -- bash -c "apt-get update && \
+   pct exec 200 -- bash -c "apt-get update && \
      DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
      python3-full python3-pip python3-venv poppler-utils \
      fonts-dejavu fonts-dejavu-core fonts-dejavu-extra locales \
      avahi-daemon libnss-mdns"
-   pct exec 133 -- python3 -m venv /opt/labelprinter/venv
-   pct exec 133 -- /opt/labelprinter/venv/bin/pip install \
+   pct exec 200 -- python3 -m venv /opt/labelprinter/venv
+   pct exec 200 -- /opt/labelprinter/venv/bin/pip install \
      brother_ql pillow qrcode fastapi 'uvicorn[standard]' python-multipart pdf2image
    ```
 
@@ -148,7 +150,8 @@ labels.yourdomain.tld {
 }
 ```
 
-**Security note:** the service has no auth of its own. If you expose it
+**Security note:** the service rejects cross-origin writes from browsers, but
+has no auth of its own. If you expose it
 publicly, *always* add IP allowlisting, basic auth, or OAuth in the proxy.
 The printer happily prints whatever anyone sends it.
 
@@ -270,6 +273,7 @@ http://<host>:8000/?d=<base64-urlsafe-json>
 │   ├── static/           # JS + CSS designer app
 │   └── templates/        # HTML (single-page shell)
 ├── seed-templates/       # example templates
+├── tests/                # pytest
 ├── deploy.sh             # rsync deploy to remote LXC
 ├── labelprinter.service  # systemd unit
 └── README.md
@@ -281,4 +285,5 @@ to hard-reload the browser.
 
 ## License
 
-MIT. See [LICENSE](./LICENSE).
+GNU Affero General Public License v3.0 or later. See [LICENSE](./LICENSE).
+Release `0bdc8b9` remains available under MIT.

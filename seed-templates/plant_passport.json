@@ -2,54 +2,55 @@
   "title": "Plant passport",
   "label": {
     "width_mm": 62,
-    "height_mm": 30,
+    "height_mm": 27,
     "border": true,
     "border_mm": 0.3
   },
   "elements": [
     {
       "type": "qr",
-      "x_mm": 3,
-      "y_mm": 3,
-      "w_mm": 22,
-      "h_mm": 22,
-      "data": "{{url}}"
+      "x_mm": 2.36,
+      "y_mm": 2.32,
+      "w_mm": 23.91,
+      "h_mm": 22.72,
+      "data": "https://lekkerlevenland.nl/t/{{short_id}}"
     },
     {
       "type": "text",
-      "x_mm": 27,
-      "y_mm": 3,
-      "w_mm": 34,
+      "x_mm": 26.99,
+      "y_mm": 2.54,
+      "w_mm": 34.03,
       "h_mm": 5,
+      "text": "{{nl_name}}",
+      "size_pt": 10,
+      "bold": true
+    },
+    {
+      "type": "text",
+      "x_mm": 27.02,
+      "y_mm": 7.54,
+      "w_mm": 34.03,
+      "h_mm": 3.98,
       "text": "{{latin}}",
       "size_pt": 9,
-      "bold": true,
       "italic": true
     },
     {
       "type": "text",
       "x_mm": 27,
-      "y_mm": 10,
-      "w_mm": 34,
-      "h_mm": 4,
-      "text": "{{nl_name}}",
-      "size_pt": 9
-    },
-    {
-      "type": "text",
-      "x_mm": 27,
-      "y_mm": 16,
-      "w_mm": 34,
-      "h_mm": 6,
+      "y_mm": 12.53,
+      "w_mm": 34.03,
+      "h_mm": 6.01,
       "text": "{{other}}",
-      "size_pt": 7
+      "size_pt": 7,
+      "wrap": true
     },
     {
       "type": "text",
-      "x_mm": 27,
-      "y_mm": 23,
-      "w_mm": 34,
-      "h_mm": 4,
+      "x_mm": 26.99,
+      "y_mm": 23.03,
+      "w_mm": 34.03,
+      "h_mm": 3.98,
       "text": "{{short_id}}",
       "size_pt": 7,
       "mono": true

@@ -21,26 +21,56 @@
           <span class="dot"></span>
           <span id="printerText">verbinden…</span>
         </div>
+        <button class="queue-chip" id="queueChip" hidden title="Klik om wachtrij te beheren">
+          <span class="queue-icon">📋</span>
+          <span id="queueText">0 in wachtrij</span>
+        </button>
         <div class="menu-wrap">
           <button class="btn ghost" id="btnTemplates" title="Templates">📋 Template ▾</button>
           <div class="menu" id="templatesMenu" role="menu"></div>
         </div>
         <button class="btn ghost" id="btnPdf" title="PDF uploaden en printen">📄 PDF</button>
-        <button class="btn ghost" id="btnShare" title="Kopieer deelbare link">🔗 Link</button>
+        <button class="btn ghost" id="btnImage" title="Afbeelding uploaden en printen">🖼 Afbeelding</button>
+        <button class="btn ghost" id="btnShare" title="Kopieer een link naar dit label om te delen">📤 Delen</button>
         <div class="menu-wrap">
           <button class="btn ghost" id="btnMore" title="Meer acties">⋯</button>
           <div class="menu" id="moreMenu" role="menu">
+            <button role="menuitem" id="btnHistory">🕒 Recente prints</button>
             <button role="menuitem" id="btnExport">⬇︎ Download JSON</button>
             <button role="menuitem" id="btnImport">⬆︎ Upload JSON</button>
             <button role="menuitem" id="btnSaveTemplate">💾 Opslaan als template…</button>
           </div>
         </div>
-        <button class="btn primary" id="btnPrint">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          Print
-        </button>
+        <label class="fold-toggle" id="foldToggleWrap" title="Print 2× op één strook continu papier — tweede helft 180° gedraaid. Vouwen langs het midden, plakkant naar binnen, voor een dubbelzijdige laminaat-kaart.">
+          <input type="checkbox" id="foldToggle">
+          <span class="fold-toggle-label">🔁 Vouwbaar</span>
+        </label>
+        <div class="print-split">
+          <button class="btn primary" id="btnPrint">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print
+          </button>
+          <div class="menu-wrap">
+            <button class="btn primary" id="btnPrintMore" title="Meer printopties" aria-label="Meer printopties">▾</button>
+            <div class="menu" id="printMenu" role="menu">
+              <button id="btnPrintCopies">Meerdere…</button>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
+
+    <div class="alert alert-printer" id="printerAlert" hidden>
+      <img class="alert-photo" src="/static/printer-power-button.png" alt="Brother QL-570 met groene pijl naar de aan-knop">
+      <div class="alert-text">
+        <div class="alert-title">Printer staat uit</div>
+        <div class="alert-sub">Druk op de aan-knop van de Brother QL-570 (zie groene pijl). Prints worden in de tussentijd opgeslagen en automatisch verstuurd zodra de printer aan staat.</div>
+        <div class="alert-meta" id="alertQueueLine" hidden></div>
+      </div>
+      <div class="alert-actions">
+        <button class="btn ghost small" id="alertRetry" title="Opnieuw proberen">Opnieuw proberen</button>
+      </div>
+    </div>
 
     <aside class="toolbar">
       <button class="tool active" data-tool="select" title="Selecteren (V)">
@@ -59,6 +89,16 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="19" x2="19" y2="5"/></svg>
       </button>
       <div class="tool-sep"></div>
+      <button class="tool" data-tool="undo" id="btnUndo" disabled title="Ongedaan maken (⌘Z / Ctrl+Z)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+      </button>
+      <button class="tool" data-tool="redo" id="btnRedo" disabled title="Opnieuw doen (⇧⌘Z / Ctrl+Y)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/></svg>
+      </button>
+      <div class="tool-sep"></div>
+      <button class="tool" data-tool="duplicate" id="btnDuplicate" disabled title="Dupliceren (⌘D / Ctrl+D) · kopiëren ⌘C, plakken ⌘V">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
       <button class="tool" data-tool="delete" title="Verwijderen (Del)">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
       </button>
@@ -98,6 +138,13 @@
         </div>
         <p class="muted small">Auto-gedetecteerd op basis van sensor. Je kunt overschrijven.</p>
         <div class="row" style="margin-top: 0.8rem;">
+          <label>Oriëntatie</label>
+          <select id="orientSel">
+            <option value="portrait">📄 Staand (portrait)</option>
+            <option value="landscape">🖼️ Liggend (landscape)</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top: 0.8rem;">
           <label>Kader</label>
           <label class="switch">
             <input type="checkbox" id="borderToggle">
@@ -127,6 +174,62 @@
     </footer>
 
     <div class="toast" id="toast"></div>
+
+    <div class="modal" id="imgModal" hidden>
+      <div class="modal-card">
+        <header class="modal-header">
+          <h2>Afbeelding printen</h2>
+          <button class="btn icon" id="imgClose" title="Sluiten">×</button>
+        </header>
+        <div class="modal-body">
+          <div class="dropzone" id="imgDrop">
+            <div class="dz-icon">🖼</div>
+            <div class="dz-title">Sleep een afbeelding hierheen</div>
+            <div class="dz-sub">PNG / JPG / WebP · of <button class="btn ghost" id="imgPick">kies een bestand…</button></div>
+            <input type="file" id="imgInput" accept="image/*" hidden>
+          </div>
+          <div class="pdf-preview" id="imgPreview" hidden>
+            <img id="imgImg" alt="preview">
+            <div class="pdf-meta" id="imgMeta"></div>
+          </div>
+        </div>
+        <footer class="modal-footer">
+          <label class="inline-check"><input type="checkbox" id="imgDither" checked> Dithering (beter voor foto's)</label>
+          <div class="spacer"></div>
+          <button class="btn" id="imgCancel">Annuleren</button>
+          <button class="btn primary" id="imgPrint" disabled>Print</button>
+        </footer>
+      </div>
+    </div>
+
+    <div class="modal" id="queueModal" hidden>
+      <div class="modal-card" style="width: min(640px, 92vw);">
+        <header class="modal-header">
+          <h2>Wachtrij</h2>
+          <button class="btn icon" id="queueClose" title="Sluiten">×</button>
+        </header>
+        <div class="modal-body" id="queueBody">
+          <div class="menu-empty">Laden…</div>
+        </div>
+        <footer class="modal-footer">
+          <button class="btn ghost" id="queueClear">Leegmaken</button>
+          <div class="spacer"></div>
+          <button class="btn" id="queueFlush">Nu proberen te printen</button>
+        </footer>
+      </div>
+    </div>
+
+    <div class="modal" id="historyModal" hidden>
+      <div class="modal-card" style="width: min(700px, 92vw);">
+        <header class="modal-header">
+          <h2>Recente prints</h2>
+          <button class="btn icon" id="historyClose" title="Sluiten">×</button>
+        </header>
+        <div class="modal-body" id="historyBody">
+          <div class="menu-empty">Laden…</div>
+        </div>
+      </div>
+    </div>
 
     <div class="modal" id="pdfModal" hidden>
       <div class="modal-card">
