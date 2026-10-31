@@ -1,14 +1,44 @@
 # Labelprinter
 
-A premium web-based label designer and REST service for the **Brother QL-570**
-(and compatible `brother_ql` models). Designed to run in a **Proxmox LXC** with
-USB passthrough of the printer.
+**Your label printer deserves better than a dusty desktop app.**
 
-Replaces the dated Brother P-touch desktop software with a modern browser app
-plus a clean REST API you can call from anything (Rails, Home Assistant,
-shell scripts, …).
+Design labels in the browser, print them from anywhere on your network, and let
+your other software print them too. Labelprinter turns a **Brother QL-570** (and
+compatible `brother_ql` models) into a small label service with a friendly
+designer on top. Self-hosted, no account, no cloud.
 
-![screenshot placeholder](./docs/screenshot.png)
+![The designer with an egg box label loaded](./docs/designer.png)
+
+## What you can do with it
+
+- **Design it like a drawing.** Text, QR codes, rectangles and lines on a canvas,
+  with bundled fonts, undo, multi-select and copy-paste across labels.
+- **See what you'll get.** The preview runs at the printer's own 300 DPI.
+- **Print once, or a whole batch.** Pick *Meerdere…* from the Print button for up
+  to 99 copies.
+- **Keep the printer off until you need it.** Labels wait in a queue and come out
+  as soon as you switch it on.
+- **Fold a label around a stem.** Fold mode prints your design twice on one strip,
+  so a tag reads from both sides.
+- **Reuse your favourites.** Templates with `{{placeholders}}`, picked by thumbnail.
+- **Share a label as a link.** One click copies a URL with the whole design inside.
+- **Print what you already have.** Drop in a PDF, such as a shipping label, or an
+  image.
+- **Automate everything.** A REST API for Rails, Home Assistant, shell scripts, or
+  whatever else needs a label.
+
+<table>
+  <tr>
+    <td><img src="./docs/template-picker.png" alt="Template picker with thumbnails"></td>
+    <td><img src="./docs/print-copies.png" alt="Print button with a dropdown for multiple copies"></td>
+  </tr>
+  <tr>
+    <td>Choose a template by what it looks like</td>
+    <td>Print one, or several</td>
+  </tr>
+</table>
+
+The interface is in Dutch for now.
 
 ## Features
 
