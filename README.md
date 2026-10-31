@@ -56,9 +56,9 @@ The interface is in Dutch for now.
 
 ## Why not the official software
 
-Brother's P-touch Editor is Windows/Mac-only, dated UX, and doesn't expose a
-REST API. This project runs 24/7 on a headless Linux container, speaks HTTP,
-and gives a designer that feels like a web app instead of a set of web pages.
+Brother's P-touch Editor ties the printer to one computer. Labelprinter makes it
+a print server with a UI: the printer is shared, and anyone you give access can
+find it, design a label and print from their own device, with nothing to install.
 
 ## Architecture
 
