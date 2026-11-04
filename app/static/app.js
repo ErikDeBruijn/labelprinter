@@ -301,15 +301,17 @@ function drawElement(el) {
         ctx.fillText(lines[i], el.x, el.y + i * lineH);
       }
     } else {
-      // Single-line auto-shrink to fit width (down to 6pt)
+      // No wrapping: each \n starts a line; all lines shrink together to fit width (down to 6pt)
+      const lines = el.text.split("\n");
       let pt = el.size_pt;
       const MIN_PT = 6;
       while (pt >= MIN_PT) {
         ctx.font = baseStyle(pt);
-        if (ctx.measureText(el.text).width <= el.width - 4) break;
+        if (Math.max(...lines.map(l => ctx.measureText(l).width)) <= el.width - 4) break;
         pt -= 0.5;
       }
-      ctx.fillText(el.text, el.x, el.y);
+      const lineH = Math.round((Math.max(pt, MIN_PT) * DPI) / 72) * 1.2;
+      lines.forEach((line, i) => ctx.fillText(line, el.x, el.y + i * lineH));
     }
   } else if (el.type === "rect") {
     const sw = Math.max(1, mmPx(el.stroke_mm || 0.3));
@@ -369,23 +371,34 @@ function rasterForPrint() {
   return off;
 }
 
-// Single-line text auto-shrinks to its box width at draw time. So that the
+// Unwrapped text auto-shrinks to its box width at draw time. So that the
 // "Grootte (pt)" field (and font/style changes) actually take effect, grow the
-// box to fit the text at the requested size. Grow-only: never shrinks, so a
-// manually-widened box or an authored template box is preserved, and the
-// server's print-time shrink-to-fit for variable data still applies.
+// box to fit the text at the requested size: the widest line, and one line
+// height per line. Wrapped text keeps its width and grows in height. Grow-only:
+// never shrinks, so a manually sized box or an authored template box is
+// preserved, and the server's print-time shrink-to-fit for variable data still applies.
 function fitTextBox(el) {
-  if (!el || el.type !== "text" || el.wrap) return;
+  if (!el || el.type !== "text") return;
   const sizePx = Math.round((el.size_pt * DPI) / 72);
   ctx.font = `${el.italic ? "italic " : ""}${el.bold ? "700 " : "400 "}${sizePx}px ${fontCssFamily(el)}`;
-  const need = Math.ceil(ctx.measureText(el.text || " ").width + 8);  // clear of the draw-time fit margin
-  if (el.width < need) el.width = need;
-  const lineH = Math.ceil(sizePx * 1.2);
-  if (el.height < lineH) el.height = lineH;
+  // A trailing newline adds no line (the server drops it; the inline editor adds one while typing).
+  const text = (el.text || " ").replace(/\n$/, "");
+  const lines = el.wrap ? wrapText(text, el.width - 4) : text.split("\n");
+  if (!el.wrap) {
+    const need = Math.ceil(Math.max(...lines.map(l => ctx.measureText(l).width)) + 8);  // clear of the draw-time fit margin
+    if (el.width < need) el.width = need;
+  }
+  const needH = Math.ceil(sizePx * 1.2 * lines.length);
+  if (el.height < needH) el.height = needH;
 }
 
+// Word-wrap within maxWidth; an explicit \n always starts a new line.
 function wrapText(text, maxWidth) {
-  const words = text.split(/\s+/);
+  return text.split("\n").flatMap(p => wrapParagraph(p, maxWidth));
+}
+
+function wrapParagraph(text, maxWidth) {
+  const words = text.split(/[^\S\n]+/).filter(Boolean);
   const lines = [];
   let cur = "";
   for (const w of words) {
@@ -1716,7 +1729,7 @@ async function printLabel(copies = 1) {
   for (const el of state.elements) {
     if (el.type === "text" && el.text && STRIP_PLACEHOLDER_RE.test(el.text)) {
       saved.push({ id: el.id, key: "text", val: el.text });
-      el.text = el.text.replace(STRIP_PLACEHOLDER_RE, "").replace(/\s+/g, " ").trim();
+      el.text = el.text.replace(STRIP_PLACEHOLDER_RE, "").replace(/[^\S\n]+/g, " ").trim();
       stripped = true;
     }
     STRIP_PLACEHOLDER_RE.lastIndex = 0;

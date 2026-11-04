@@ -318,9 +318,9 @@ def _sub(text: str, vars: dict) -> str:
     if not text:
         return text
     out = _PLACEHOLDER_RE.sub(lambda m: str(vars.get(m.group(1), "")), text)
-    # Collapse whitespace left behind by removed placeholders (but don't strip
-    # inter-word spacing aggressively — just runs of 2+ spaces and surrounding).
-    return " ".join(out.split()) if out.strip() else ""
+    # Collapse whitespace left behind by removed placeholders, per line, so an
+    # explicit newline survives.
+    return "\n".join(" ".join(line.split()) for line in out.split("\n")).strip("\n") if out.strip() else ""
 
 
 def _font_for(size_pt: int, bold: bool, italic: bool, mono: bool, font: str = "") -> ImageFont.FreeTypeFont:
@@ -407,15 +407,20 @@ def render_design(design: dict, vars: dict | None = None) -> Image.Image:
 
                 if wrap and ew > 0:
                     size_px = max(1, round(size_pt * DPI / 72))
-                    lines = _wrap_runs(dr, text, font_path, size_px, ew)
+                    lines = [line for para in text.split("\n")
+                             for line in _wrap_runs(dr, para, font_path, size_px, ew)]
                     line_h = round(size_px * 1.2)
                     max_lines = max(1, int(eh / line_h)) if eh > 0 else len(lines)
                     for i, line in enumerate(lines[:max_lines]):
                         _draw_runs(dr, (x, y + i * line_h), line, font_path, size_px, ink)
                 else:
-                    # Single-line auto-shrink to fit width
-                    size_px = _fit_size_px(dr, text, font_path, size_pt, ew if ew > 0 else 10**6)
-                    _draw_runs(dr, (x, y), text, font_path, size_px, ink)
+                    # No wrapping: each \n starts a line; all lines shrink together to fit width
+                    lines = text.split("\n")
+                    size_px = min(_fit_size_px(dr, line, font_path, size_pt, ew if ew > 0 else 10**6)
+                                  for line in lines)
+                    line_h = round(size_px * 1.2)
+                    for i, line in enumerate(lines):
+                        _draw_runs(dr, (x, y + i * line_h), line, font_path, size_px, ink)
             elif t == "qr":
                 data = _sub(el.get("data", ""), vars)
                 if not data:
