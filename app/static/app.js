@@ -1441,19 +1441,27 @@ document.getElementById("btnMore").addEventListener("click", (ev) => {
   if (!wasOpen) m.classList.add("open");
 });
 
+// File name for a template title: "Betaal-link (bunq)" → "betaal_link_bunq".
+function templateSlug(title) {
+  return title.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 48);
+}
+
 async function saveAsTemplate() {
-  const suggested = (document.querySelector(".doc-title").textContent || "mijn_template")
-    .trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 48);
-  const name = prompt("Template naam (a-z0-9_-):", suggested);
-  if (!name) return;
-  if (!/^[a-z0-9][a-z0-9_-]{0,48}$/.test(name)) { toast("✗ Ongeldige naam", "err"); return; }
+  const docTitleEl = document.querySelector(".doc-title");
+  const answer = prompt("Naam van de template:", docTitleEl.textContent.trim());
+  if (answer === null) return;
+  const title = answer.trim();
+  const name = templateSlug(title);
+  if (!name) { toast("✗ Geef de template een naam met letters of cijfers", "err"); return; }
   const doc = designToJson();
-  doc.title = document.querySelector(".doc-title").textContent.trim() || name;
+  doc.title = title;
   const r = await fetch(`/templates/${encodeURIComponent(name)}`, {
     method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(doc),
   });
-  if (r.ok) toast(`✓ Template '${name}' opgeslagen`, "ok");
-  else toast("✗ Kon niet opslaan", "err");
+  if (!r.ok) { toast(`✗ Kon niet opslaan: ${await r.text()}`, "err"); return; }
+  docTitleEl.textContent = title;
+  toast(`✓ Template '${title}' opgeslagen`, "ok");
 }
 
 // ============ PDF modal ============

@@ -322,6 +322,10 @@ The frontend hot-reloads on backend `uvicorn --reload` whenever `app/` changes.
 Static assets are cache-busted via `?v=<mtime>` in the HTML so you don't need
 to hard-reload the browser.
 
+Run the tests with `pytest`. The browser tests in `tests/test_designer_e2e.py`
+drive the real designer and need Playwright (`pip install playwright`) plus
+Chrome or `playwright install chromium`; without Playwright they are skipped.
+
 ## Roadmap
 
 - **Portable print server on a Raspberry Pi:** a minimal, fast-booting image built
